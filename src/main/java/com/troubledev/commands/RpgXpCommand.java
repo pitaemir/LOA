@@ -46,6 +46,7 @@ public class RpgXpCommand extends AbstractPlayerCommand {
         }
 
         playerRef.sendMessage(Message.raw("+%d XP".formatted(amount)));
+        
         GiveXPEvent.dispatch(ref, amount);
     }
 }

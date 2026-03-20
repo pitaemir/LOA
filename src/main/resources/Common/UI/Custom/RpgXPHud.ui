@@ -13,13 +13,13 @@ Group #Root {
 
   Label #LevelLabel {
     Style: (TextColor: #f4d35e, FontSize: 18, RenderBold: true);
-    Anchor: (Left: 12, Top: 7, Width: 64, Height: 18);
+    Anchor: (Left: 12, Top: 7, Width: 80, Height: 18);
     Text: " Level 1";
   }
 
   Label #XpText {
     Style: (TextColor: #d8dee9, FontSize: 14);
-    Anchor: (Left: 78, Top: 9, Width: 220, Height: 16);
+    Anchor: (Left: 220, Top: 9, Width: 220, Height: 16);
   }
 
   Group #BarOuter {

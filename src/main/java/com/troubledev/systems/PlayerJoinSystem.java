@@ -27,10 +27,6 @@ public class PlayerJoinSystem extends RefSystem<EntityStore> {
         if (playerRef == null) return;
 
         var player = store.getComponent(ref, Player.getComponentType());
-        if (player != null) {
-            player.getHudManager().setCustomHud(playerRef, new RpgXPHud(playerRef));
-        }
-
         var rpgType = PlayerRPGComponent.getComponentType();
         var rpg = store.getComponent(ref, rpgType);
 
@@ -38,12 +34,15 @@ public class PlayerJoinSystem extends RefSystem<EntityStore> {
             playerRef.sendMessage(Message.raw(
                     "Welcome back! Level %d (%d XP)".formatted(rpg.getLevel(), rpg.getTotalExperience())
             ));
-            var hud = new RpgXPHud(playerRef);
-            player.getHudManager().setCustomHud(playerRef, hud);
-            hud.refresh(rpg);
         } else {
             commandBuffer.addComponent(ref, rpgType, new PlayerRPGComponent());
             playerRef.sendMessage(Message.raw("Welcome! Your adventure begins at Level 1."));
+        }
+
+        if (player != null) {
+            var hud = new RpgXPHud(playerRef, rpg);  // ← um único HUD, passando rpg
+            player.getHudManager().setCustomHud(playerRef, hud);
+            hud.show();
         }
     }
 
