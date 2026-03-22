@@ -72,6 +72,6 @@ public class LOAXPHud extends CustomUIHud {
         ui.setObject("#XpBarFill.Anchor", fillAnchor);
         ui.setObject("#XpBarHighlight.Anchor", highlightAnchor);
 
-        update(true, ui);
+        update(false, ui);
     }
 }
