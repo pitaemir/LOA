@@ -1,13 +1,14 @@
 package com.troubledev.handlers;
 
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.troubledev.events.LevelUpEvent;
+import com.troubledev.ui.LOAXPHud;
 
 import java.util.function.Consumer;
 
 public class LevelUpHandler implements Consumer<LevelUpEvent> {
-
     @Override
     public void accept(LevelUpEvent event) {
         if (!event.playerRef().isValid()) return;
@@ -22,5 +23,14 @@ public class LevelUpHandler implements Consumer<LevelUpEvent> {
         };
 
         playerRef.sendMessage(Message.raw(message));
+
+        // mostra o banner na HUD
+        var player = store.getComponent(event.playerRef(), Player.getComponentType());
+        if (player != null) {
+            var rawHud = player.getHudManager().getCustomHud();
+            if (rawHud instanceof LOAXPHud hud) {
+                hud.showLevelUp(event.newLevel());
+            }
+        }
     }
 }

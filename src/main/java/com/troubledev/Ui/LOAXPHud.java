@@ -11,7 +11,7 @@ import com.hypixel.hytale.server.core.ui.Value;
 public class LOAXPHud extends CustomUIHud {
 
     private static final int BAR_MAX_WIDTH = 290;
-    private PlayerLOAComponent loa; // ← sem final
+    private PlayerLOAComponent loa;
 
     public LOAXPHud(PlayerRef playerRef, PlayerLOAComponent loa) {
         super(playerRef);
@@ -21,6 +21,7 @@ public class LOAXPHud extends CustomUIHud {
     @Override
     protected void build(UICommandBuilder ui) {
         ui.append("LOAXPHud.ui");
+        ui.set("#LevelUpBanner.Visible", false); // ← esconde ao entrar
         if (loa != null) {
             int fillWidth = Math.round(loa.getProgress() * BAR_MAX_WIDTH);
 
@@ -47,7 +48,7 @@ public class LOAXPHud extends CustomUIHud {
     }
 
     public void refresh(PlayerLOAComponent loa) {
-        this.loa = loa; // ← atualiza a referência
+        this.loa = loa;
         UICommandBuilder ui = new UICommandBuilder();
 
         int fillWidth = Math.round(loa.getProgress() * BAR_MAX_WIDTH);
@@ -72,6 +73,13 @@ public class LOAXPHud extends CustomUIHud {
         ui.setObject("#XpBarFill.Anchor", fillAnchor);
         ui.setObject("#XpBarHighlight.Anchor", highlightAnchor);
 
+        update(false, ui);
+    }
+
+    public void showLevelUp(int newLevel) {
+        UICommandBuilder ui = new UICommandBuilder();
+        ui.set("#LevelUpBanner.Visible", true);
+        ui.set("#LevelUpText.TextSpans", Message.raw("LEVEL UP! Now Level " + newLevel + "!"));
         update(false, ui);
     }
 }

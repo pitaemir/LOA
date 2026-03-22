@@ -3,16 +3,36 @@ package com.troubledev.level;
 public final class WeaponMasteryTable {
 
     private static final long[] LEVEL_THRESHOLDS = {
-        0L,      // level 1
-        100L,    // level 2
-        250L,    // level 3
-        500L,    // level 4
-        900L,    // level 5
-        1400L,   // level 6
-        2000L,   // level 7
-        2700L,   // level 8
-        3500L,   // level 9
-        4500L    // level 10
+    0L,      // level 1
+    240L,    // level 2
+    640L,    // level 3
+    1160L,   // level 4
+    1760L,   // level 5
+    2440L,   // level 6
+    3200L,   // level 7
+    4000L,   // level 8
+    4900L,   // level 9
+    5900L,   // level 10
+    7000L,   // level 11
+    8200L,   // level 12
+    9500L,   // level 13
+    10900L,  // level 14
+    12400L,  // level 15
+    14000L,  // level 16
+    15700L,  // level 17
+    17500L,  // level 18
+    19400L,  // level 19
+    21400L,  // level 20
+    23600L,  // level 21
+    26000L,  // level 22
+    28600L,  // level 23
+    31400L,  // level 24
+    34400L,  // level 25
+    38400L,  // level 26
+    43400L,  // level 27
+    49400L,  // level 28
+    56400L,  // level 29
+    63900L   // level 30
     };
 
     public static final int MAX_LEVEL = 10;

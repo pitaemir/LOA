@@ -41,4 +41,15 @@ Group #Root {
       }
     }
   }
+
+  Group #LevelUpBanner {
+      Anchor: (Left: 0, Top: -40, Width: 316, Height: 35);
+      Background: #f4a835;
+
+      Label #LevelUpText {
+        Style: (TextColor: #ffffff, FontSize: 16, RenderBold: true);
+        Anchor: (Left: 0, Top: 8, Width: 316, Height: 20);
+        Text: "LEVEL UP!";
+      }
+    }
 }
