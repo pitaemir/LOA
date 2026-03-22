@@ -1,55 +1,49 @@
-# Legends of the Ascended - LOA
+# Legends of the Ascended (LotA)
 
 ![Hytale](https://img.shields.io/badge/Game-Hytale-purple)
 ![Framework](https://img.shields.io/badge/Framework-ECS-blue)
 ![Language](https://img.shields.io/badge/Language-Java-orange)
 ![Status](https://img.shields.io/badge/Status-In_Development-yellow)
 
-A modular **RPG progression overhaul** for *Hytale*, focused on delivering deeper gameplay through **player leveling, equipment mastery, and ascension systems**.
+A modular **RPG progression system** for *Hytale*, focused on enhancing gameplay through player leveling and systemic progression.
 
-This project is built using an **Entity Component System (ECS)** architecture, allowing scalability, maintainability, and easy expansion.
+Built using an **Entity Component System (ECS)** architecture for scalability, organization, and maintainability.
 
 ---
 
 ## Overview
 
-**Legends of the Ascended** transforms the core gameplay loop into a continuous progression experience.
+**Legends of the Ascended** introduces a structured progression system where players evolve through gameplay.
 
-Players start as ordinary adventurers and evolve through:
+The current implementation focuses on:
 
-- level-based progression (XP system)
-- equipment mastery
-- unlockable abilities
-- advanced progression systems (Ascension)
-
-The goal is to create a system where **every action contributes to player growth**.
+- XP-based leveling
+- persistent player progression
+- real-time feedback through UI
+- modular systems for future expansion
 
 ---
 
 ## Features
 
 ✔ XP and leveling system  
-✔ Configurable progression via XP table  
-✔ Custom HUD (XP bar)  
-✔ Persistent player data component  
-✔ Event-driven ECS architecture  
+✔ Configurable XP progression (XPTable)  
+✔ Custom XP HUD  
+✔ Persistent player data (component-based)  
+✔ Event-driven architecture (ECS)  
 ✔ Debug and testing commands  
-✔ Modular and expandable structure  
 
 ---
 
-## System Architecture
+## Architecture
 
-The project follows an **ECS (Entity Component System)** design:
+The project follows an **ECS (Entity Component System)** structure:
 
 ```
 src/
 │
-├── main
-│   Mod initialization
-│
 ├── components
-│   PlayerRPGComponent (player data)
+│   PlayerRPGComponent
 │
 ├── systems
 │   XPGainSystem
@@ -63,111 +57,54 @@ src/
 │   LevelUpHandler
 │
 ├── commands
-│   Debug and control commands
+│   RPG commands
 │
 ├── ui
-│   XP HUD interface
+│   XP HUD
 │
 └── util
-    XPTable and utilities
+    XPTable
 ```
 
-Each module encapsulates specific responsibilities, making the system easy to extend.
+Each module is responsible for a specific part of the system, ensuring clean separation of concerns.
 
 ---
 
-## Implemented Systems
-
-### Player XP & Level System
-
-- XP gain handled via events (`GiveXPEvent`)
-- Level progression using a configurable table (`XPTable`)
-- Automatic level-up handling
-- Designed for scalability
-
----
-
-### Player RPG Component
-
-Stores persistent player data:
-
-- current level  
-- accumulated XP  
-- progression state  
-
----
-
-### ECS Systems
-
-- **XPGainSystem** → handles XP logic  
-- **PlayerJoinSystem** → initializes player data  
-- **Event + Handler system** → decoupled logic   
-
----
-
-### Commands
-
-Used for testing and debugging:
+## Commands
 
 - `/rpgxp` → grant XP  
-- `/rpgstats` → display player stats   
+- `/rpgstats` → view player stats  
+- `/rpg` → base command  
 
 ---
 
-## Planned Systems
+## Setup
 
-### Equipment Mastery
-- Weapons gain experience through usage  
-- Unlock unique perks and abilities  
-- Enables different playstyles  
+### 1. Clone the repository
 
----
+```bash
+git clone https://github.com/your-username/legends-of-the-ascended.git
+```
 
-### Ascension System
-- Progression beyond level caps  
-- Permanent upgrades and specialization  
-- New layers of power  
+### 2. Configure environment
 
----
+- Import using Gradle  
+- Ensure `HytaleServer.jar` is available in `/libs`  
 
-### Ability System
-- Active and passive skills  
-- Synergy with weapons and progression  
+### 3. Run
 
----
-
-### Dynamic Content
-- Custom mobs  
-- Scalable challenges  
-- Progression-based objectives  
-
----
-
-## Roadmap
-
-- [x] Core XP system  
-- [x] Level progression  
-- [x] Player component  
-- [x] XP HUD  
-- [ ] Equipment mastery system  
-- [ ] Ability system  
-- [ ] Ascension system  
-- [ ] Content expansion  
-- [ ] Balancing & polish  
+Start the Hytale modding environment with the project configured.
 
 ---
 
 ## Author
 
-Project developed for practical study of:
+Project focused on:
 
-- Game Systems Design  
 - ECS Architecture  
 - RPG Progression Systems  
 - Hytale Mod Development  
 
 ---
 
-## Vision
-
-> *Forge your legend. Ascend beyond limits.*
+> *Forge your legend.*
