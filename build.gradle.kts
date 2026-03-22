@@ -21,7 +21,7 @@ dependencies {
 tasks.jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    archiveBaseName.set("RpgSystemsTutorial")
+    archiveBaseName.set("LOASystems")
     archiveVersion.set(version.toString())
 }
 

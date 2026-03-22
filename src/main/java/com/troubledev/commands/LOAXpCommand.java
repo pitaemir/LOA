@@ -11,18 +11,18 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.troubledev.components.PlayerRPGComponent;
+import com.troubledev.components.PlayerLOAComponent;
 import com.troubledev.events.GiveXPEvent;
 
 import javax.annotation.Nonnull;
 
-public class RpgXpCommand extends AbstractPlayerCommand {
+public class LOAXpCommand extends AbstractPlayerCommand {
 
     private static final int DEFAULT_AMOUNT = 50;
 
     private final OptionalArg<Integer> amountArg;
 
-    public RpgXpCommand() {
+    public LOAXpCommand() {
         super("xp", "Give yourself XP");
         this.amountArg = withOptionalArg("amount", "XP amount (>0)", ArgTypes.INTEGER)
                 .addValidator(Validators.greaterThan(0));
@@ -39,9 +39,9 @@ public class RpgXpCommand extends AbstractPlayerCommand {
         var amount = amountArg.get(context);
         if (amount == null) amount = DEFAULT_AMOUNT;
 
-        // Check if player has RPG component
-        if (store.getComponent(ref, PlayerRPGComponent.getComponentType()) == null) {
-            playerRef.sendMessage(Message.raw("No RPG data found"));
+        // Check if player has loa component
+        if (store.getComponent(ref, PlayerLOAComponent.getComponentType()) == null) {
+            playerRef.sendMessage(Message.raw("No loa data found"));
             return;
         }
 

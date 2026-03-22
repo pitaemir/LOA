@@ -2,8 +2,8 @@ package com.troubledev;
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
-import com.troubledev.commands.RpgCommand;
-import com.troubledev.components.PlayerRPGComponent;
+import com.troubledev.commands.LOACommand;
+import com.troubledev.components.PlayerLOAComponent;
 import com.troubledev.events.GiveXPEvent;
 import com.troubledev.events.LevelUpEvent;
 import com.troubledev.handlers.GiveXPHandler;
@@ -12,9 +12,9 @@ import com.troubledev.systems.PlayerJoinSystem;
 import com.troubledev.systems.XPGainSystem;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
-public class RpgSystemsTutorial extends JavaPlugin {
+public class LOASystems extends JavaPlugin {
 
-    public RpgSystemsTutorial(@NonNullDecl JavaPluginInit init) {
+    public LOASystems(@NonNullDecl JavaPluginInit init) {
         super(init);
     }
 
@@ -22,12 +22,12 @@ public class RpgSystemsTutorial extends JavaPlugin {
     protected void setup() {
         var registry = getEntityStoreRegistry();
 
-        var rpgType = registry.registerComponent(
-                PlayerRPGComponent.class,
-                "MiniRPG_PlayerData",
-                PlayerRPGComponent.CODEC
+        var loaType = registry.registerComponent(
+                PlayerLOAComponent.class,
+                "Miniloa_PlayerData",
+                PlayerLOAComponent.CODEC
         );
-        PlayerRPGComponent.setComponentType(rpgType);
+        PlayerLOAComponent.setComponentType(loaType);
 
         registry.registerSystem(new XPGainSystem());
         registry.registerSystem(new PlayerJoinSystem());
@@ -35,6 +35,6 @@ public class RpgSystemsTutorial extends JavaPlugin {
         getEventRegistry().register(GiveXPEvent.class, new GiveXPHandler());
         getEventRegistry().register(LevelUpEvent.class, new LevelUpHandler());
 
-        getCommandRegistry().registerCommand(new RpgCommand());
+        getCommandRegistry().registerCommand(new LOACommand());
     }
 }

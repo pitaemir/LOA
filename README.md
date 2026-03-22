@@ -5,7 +5,7 @@
 ![Language](https://img.shields.io/badge/Language-Java-orange)
 ![Status](https://img.shields.io/badge/Status-In_Development-yellow)
 
-A modular **RPG progression system** for *Hytale*, focused on enhancing gameplay through player leveling and systemic progression.
+A modular **loa progression system** for *Hytale*, focused on enhancing gameplay through player leveling and systemic progression.
 
 Built using an **Entity Component System (ECS)** architecture for scalability, organization, and maintainability.
 
@@ -43,7 +43,7 @@ The project follows an **ECS (Entity Component System)** structure:
 src/
 │
 ├── components
-│   PlayerRPGComponent
+│   playerLOAComponent
 │
 ├── systems
 │   XPGainSystem
@@ -57,7 +57,7 @@ src/
 │   LevelUpHandler
 │
 ├── commands
-│   RPG commands
+│   loa commands
 │
 ├── ui
 │   XP HUD
@@ -72,9 +72,9 @@ Each module is responsible for a specific part of the system, ensuring clean sep
 
 ## Commands
 
-- `/rpgxp` → grant XP  
-- `/rpgstats` → view player stats  
-- `/rpg` → base command  
+- `/loaxp` → grant XP  
+- `/loastats` → view player stats  
+- `/loa` → base command  
 
 ---
 
@@ -102,7 +102,7 @@ Start the Hytale modding environment with the project configured.
 Project focused on:
 
 - ECS Architecture  
-- RPG Progression Systems  
+- loa Progression Systems  
 - Hytale Mod Development  
 
 ---

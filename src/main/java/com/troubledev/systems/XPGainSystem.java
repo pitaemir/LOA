@@ -8,7 +8,7 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.troubledev.components.PlayerRPGComponent;
+import com.troubledev.components.PlayerLOAComponent;
 import com.troubledev.events.GiveXPEvent;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -41,8 +41,8 @@ public class XPGainSystem extends DeathSystems.OnDeathSystem {
         var killer = store.getComponent(killerRef, PlayerRef.getComponentType());
         if (killer == null) return;
 
-        var playerRpgComponent = store.getComponent(killerRef, PlayerRPGComponent.getComponentType());
-        if (playerRpgComponent == null) return;
+        var loa = store.getComponent(killerRef, PlayerLOAComponent.getComponentType());
+        if (loa == null) return;
 
 
         killer.sendMessage(Message.raw("+%d XP".formatted(XP_PER_KILL)));

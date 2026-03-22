@@ -9,20 +9,20 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.troubledev.level.XPTable;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
-public class PlayerRPGComponent implements Component<EntityStore> {
+public class PlayerLOAComponent implements Component<EntityStore> {
 
-    private static ComponentType<EntityStore, PlayerRPGComponent> TYPE;
+    private static ComponentType<EntityStore, PlayerLOAComponent> TYPE;
 
-    public static void setComponentType(ComponentType<EntityStore, PlayerRPGComponent> type) {
+    public static void setComponentType(ComponentType<EntityStore, PlayerLOAComponent> type) {
         TYPE = type;
     }
 
-    public static ComponentType<EntityStore, PlayerRPGComponent> getComponentType() {
+    public static ComponentType<EntityStore, PlayerLOAComponent> getComponentType() {
         return TYPE;
     }
 
-    public static final BuilderCodec<PlayerRPGComponent> CODEC = BuilderCodec
-            .builder(PlayerRPGComponent.class, PlayerRPGComponent::new)
+    public static final BuilderCodec<PlayerLOAComponent> CODEC = BuilderCodec
+            .builder(PlayerLOAComponent.class, PlayerLOAComponent::new)
             .append(
                     new KeyedCodec<>("TotalExperience", Codec.LONG),
                     (component, value) -> component.totalExperience = value,
@@ -32,10 +32,10 @@ public class PlayerRPGComponent implements Component<EntityStore> {
 
     private long totalExperience = 0;
 
-    public PlayerRPGComponent() {
+    public PlayerLOAComponent() {
     }
 
-    public PlayerRPGComponent(long totalExperience) {
+    public PlayerLOAComponent(long totalExperience) {
         this.totalExperience = Math.max(0L, totalExperience);
     }
 
@@ -79,13 +79,13 @@ public class PlayerRPGComponent implements Component<EntityStore> {
 
     @NullableDecl
     @Override
-    public PlayerRPGComponent clone() {
-        return new PlayerRPGComponent(this.totalExperience);
+    public PlayerLOAComponent clone() {
+        return new PlayerLOAComponent(this.totalExperience);
     }
 
     @Override
     public String toString() {
-        return "PlayerRPGComponent{level=" + getLevel() +
+        return "PlayerLOAComponent{level=" + getLevel() +
                 ", totalXP=" + totalExperience +
                 ", toNext=" + getXPToNextLevel() + "}";
     }

@@ -20,15 +20,15 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * /rpg spawn - Spawns NPCs around the player for testing.
+ * /loa spawn - Spawns NPCs around the player for testing.
  *
  * Usage:
- *   /rpg spawn                     -> respawn player
- *   /rpg spawn --type Zombie       -> 5 Zombies
- *   /rpg spawn --count 10          -> 10 Skeletons
- *   /rpg spawn --type Kweebec --count 3
+ *   /loa spawn                     -> respawn player
+ *   /loa spawn --type Zombie       -> 5 Zombies
+ *   /loa spawn --count 10          -> 10 Skeletons
+ *   /loa spawn --type Kweebec --count 3
  */
-public class RpgSpawnCommand extends AbstractPlayerCommand {
+public class LOASpawnCommand extends AbstractPlayerCommand {
 
     private static final String DEFAULT_TYPE = "Skeleton";
     private static final int DEFAULT_COUNT = 5;
@@ -37,7 +37,7 @@ public class RpgSpawnCommand extends AbstractPlayerCommand {
     private final OptionalArg<String> typeArg;
     private final OptionalArg<Integer> countArg;
 
-    public RpgSpawnCommand() {
+    public LOASpawnCommand() {
         super("spawn", "Spawn NPCs around you");
         this.typeArg = withOptionalArg("type", "NPC type", ArgTypes.STRING);
         this.countArg = withOptionalArg("count", "Amount (1-50)", ArgTypes.INTEGER)

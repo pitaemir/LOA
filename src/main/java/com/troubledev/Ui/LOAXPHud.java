@@ -4,29 +4,29 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
-import com.troubledev.components.PlayerRPGComponent;
+import com.troubledev.components.PlayerLOAComponent;
 import com.hypixel.hytale.server.core.ui.Anchor;
 import com.hypixel.hytale.server.core.ui.Value;
 
-public class RpgXPHud extends CustomUIHud {
+public class LOAXPHud extends CustomUIHud {
 
     private static final int BAR_MAX_WIDTH = 290;
-    private final PlayerRPGComponent rpg;
+    private final PlayerLOAComponent loa;
 
-    public RpgXPHud(PlayerRef playerRef, PlayerRPGComponent rpg) {
+    public LOAXPHud(PlayerRef playerRef, PlayerLOAComponent loa) {
         super(playerRef);
-        this.rpg = rpg;
+        this.loa = loa;
     }
 
     @Override
     protected void build(UICommandBuilder ui) {
-      ui.append("RpgXPHud.ui");
-    if (rpg != null) {
-        int fillWidth = Math.round(rpg.getProgress() * BAR_MAX_WIDTH);
+      ui.append("LOAXPHud.ui");
+    if (loa != null) {
+        int fillWidth = Math.round(loa.getProgress() * BAR_MAX_WIDTH);
 
-        ui.set("#LevelLabel.TextSpans", Message.raw(" Level " + rpg.getLevel()));
+        ui.set("#LevelLabel.TextSpans", Message.raw(" Level " + loa.getLevel()));
         ui.set("#XpText.TextSpans", Message.raw(
-            rpg.getCurrentLevelXP() + " / " + (rpg.getCurrentLevelXP() + rpg.getXPToNextLevel()) + " XP"
+            loa.getCurrentLevelXP() + " / " + (loa.getCurrentLevelXP() + loa.getXPToNextLevel()) + " XP"
         ));
 
         Anchor fillAnchor = new Anchor();
@@ -46,14 +46,14 @@ public class RpgXPHud extends CustomUIHud {
         }
     }
 
-    public void refresh(PlayerRPGComponent rpg) {
+    public void refresh(PlayerLOAComponent loa) {
         UICommandBuilder ui = new UICommandBuilder();
 
-        int fillWidth = Math.round(rpg.getProgress() * BAR_MAX_WIDTH);
+        int fillWidth = Math.round(loa.getProgress() * BAR_MAX_WIDTH);
 
-        ui.set("#LevelLabel.TextSpans", Message.raw(" Level " + rpg.getLevel()));
+        ui.set("#LevelLabel.TextSpans", Message.raw(" Level " + loa.getLevel()));
         ui.set("#XpText.TextSpans", Message.raw(
-            rpg.getCurrentLevelXP() + " / " + (rpg.getCurrentLevelXP() + rpg.getXPToNextLevel()) + " XP"
+            loa.getCurrentLevelXP() + " / " + (loa.getCurrentLevelXP() + loa.getXPToNextLevel()) + " XP"
         ));
 
         Anchor fillAnchor = new Anchor();

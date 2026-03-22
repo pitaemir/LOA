@@ -1,2 +1,2 @@
-rootProject.name = "rpg-systems-tutorial"
+rootProject.name = "loa-systems-tutorial"
 

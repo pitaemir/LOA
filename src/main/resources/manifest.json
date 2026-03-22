@@ -1,7 +1,7 @@
 {
   "Group": "Tutorial",
-  "Name": "MiniRPGPlugin",
+  "Name": "MiniloaPlugin",
   "Version": "1.0.0",
-  "Main": "com.troubledev.RpgSystemsTutorial",
+  "Main": "com.troubledev.LOASystems",
   "IncludesAssetPack": true
 }

@@ -8,15 +8,15 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.troubledev.components.PlayerRPGComponent;
+import com.troubledev.components.PlayerLOAComponent;
 import com.troubledev.level.XPTable;
 
 import javax.annotation.Nonnull;
 
-public class RpgStatsCommand extends AbstractPlayerCommand {
+public class LOAStatsCommand extends AbstractPlayerCommand {
 
-    public RpgStatsCommand() {
-        super("stats", "Show your RPG stats");
+    public LOAStatsCommand() {
+        super("stats", "Show your loa stats");
     }
 
     @Override
@@ -27,26 +27,26 @@ public class RpgStatsCommand extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
-        var rpg = store.getComponent(ref, PlayerRPGComponent.getComponentType());
-        if (rpg == null) {
-            playerRef.sendMessage(Message.raw("No RPG data found"));
+        var loa = store.getComponent(ref, PlayerLOAComponent.getComponentType());
+        if (loa == null) {
+            playerRef.sendMessage(Message.raw("No loa data found"));
             return;
         }
 
-        var level = rpg.getLevel();
-        var totalXp = rpg.getTotalExperience();
-        var currentXp = rpg.getCurrentLevelXP();
-        var toNext = rpg.getXPToNextLevel();
-        var progress = (int) (rpg.getProgress() * 100);
+        var level = loa.getLevel();
+        var totalXp = loa.getTotalExperience();
+        var currentXp = loa.getCurrentLevelXP();
+        var toNext = loa.getXPToNextLevel();
+        var progress = (int) (loa.getProgress() * 100);
 
-        playerRef.sendMessage(Message.raw("=== RPG Stats ==="));
+        playerRef.sendMessage(Message.raw("=== loa Stats ==="));
         playerRef.sendMessage(Message.raw("Level: %d%s".formatted(
                 level,
-                rpg.isMaxLevel() ? " (MAX)" : ""
+                loa.isMaxLevel() ? " (MAX)" : ""
         )));
         playerRef.sendMessage(Message.raw("Total XP: %d".formatted(totalXp)));
 
-        if (!rpg.isMaxLevel()) {
+        if (!loa.isMaxLevel()) {
             playerRef.sendMessage(Message.raw("Progress: %d/%d (%d%%)".formatted(
                     currentXp,
                     currentXp + toNext,
