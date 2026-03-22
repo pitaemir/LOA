@@ -44,8 +44,6 @@ public class XPGainSystem extends DeathSystems.OnDeathSystem {
         var loa = store.getComponent(killerRef, PlayerLOAComponent.getComponentType());
         if (loa == null) return;
 
-
-        killer.sendMessage(Message.raw("+%d XP".formatted(XP_PER_KILL)));
         GiveXPEvent.dispatch(killerRef, XP_PER_KILL);
     }
 }

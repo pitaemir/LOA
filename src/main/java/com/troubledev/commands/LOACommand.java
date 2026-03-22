@@ -9,5 +9,6 @@ public class LOACommand extends AbstractCommandCollection {
         addSubCommand(new LOASpawnCommand());
         addSubCommand(new LOAXpCommand());
         addSubCommand(new LOAStatsCommand());
+        addSubCommand(new LOAResetLevel());
     }
 }
