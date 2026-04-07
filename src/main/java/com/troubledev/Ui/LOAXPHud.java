@@ -81,5 +81,13 @@ public class LOAXPHud extends CustomUIHud {
         ui.set("#LevelUpBanner.Visible", true);
         ui.set("#LevelUpText.TextSpans", Message.raw("LEVEL UP! Now Level " + newLevel + "!"));
         update(false, ui);
+
+        // esconde depois de 3 segundos
+        var playerRef = getPlayerRef();
+        java.util.concurrent.Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+            UICommandBuilder hideUi = new UICommandBuilder();
+            hideUi.set("#LevelUpBanner.Visible", false);
+            update(false, hideUi);
+        }, 3, java.util.concurrent.TimeUnit.SECONDS);
     }
 }

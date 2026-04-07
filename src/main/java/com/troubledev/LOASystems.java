@@ -4,6 +4,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.troubledev.commands.LOACommand;
 import com.troubledev.components.PlayerLOAComponent;
+import com.troubledev.components.WeaponMasteryComponent;
 import com.troubledev.events.GiveXPEvent;
 import com.troubledev.events.LevelUpEvent;
 import com.troubledev.handlers.GiveXPHandler;
@@ -28,6 +29,13 @@ public class LOASystems extends JavaPlugin {
                 PlayerLOAComponent.CODEC
         );
         PlayerLOAComponent.setComponentType(loaType);
+
+        var masteryType = registry.registerComponent(
+                WeaponMasteryComponent.class,
+                "Miniloa_WeaponMastery",
+                WeaponMasteryComponent.CODEC
+        );
+        WeaponMasteryComponent.setComponentType(masteryType);
 
         registry.registerSystem(new XPGainSystem());
         registry.registerSystem(new PlayerJoinSystem());

@@ -7,6 +7,7 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.troubledev.components.PlayerLOAComponent;
+import com.troubledev.components.WeaponMasteryComponent;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -37,6 +38,11 @@ public class PlayerJoinSystem extends RefSystem<EntityStore> {
         } else {
             commandBuffer.addComponent(ref, loaType, new PlayerLOAComponent());
             playerRef.sendMessage(Message.raw("Welcome! Your adventure begins at Level 1."));
+        }
+
+        var masteryType = WeaponMasteryComponent.getComponentType();
+        if (store.getComponent(ref, masteryType) == null) {
+            commandBuffer.addComponent(ref, masteryType, new WeaponMasteryComponent());
         }
 
         if (player != null) {
