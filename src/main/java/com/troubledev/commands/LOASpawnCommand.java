@@ -3,8 +3,8 @@ package com.troubledev.commands;
 import com.hypixel.hytale.codec.validation.Validators;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.math.vector.Vector3d;
-import com.hypixel.hytale.math.vector.Vector3f;
+import com.hypixel.hytale.math.vector.Rotation3f;
+import org.joml.Vector3d;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
@@ -80,13 +80,13 @@ public class LOASpawnCommand extends AbstractPlayerCommand {
         // Simple spawn: random positions around the player
         for (int i = 0; i < count; i++) {
             var spawnPos = new Vector3d(
-                    playerPos.getX() + random.nextDouble() * 6 - 3,  // -3 to +3
-                    playerPos.getY() + 0.5,
-                    playerPos.getZ() + random.nextDouble() * 6 - 3   // -3 to +3
+                    playerPos.x() + random.nextDouble() * 6 - 3,  // -3 to +3
+                    playerPos.y() + 0.5,
+                    playerPos.z() + random.nextDouble() * 6 - 3   // -3 to +3
             );
 
             var result = NPCPlugin.get().spawnNPC(
-                    worldStore, npcType, null, spawnPos, new Vector3f()
+                    worldStore, npcType, null, spawnPos, new Rotation3f()
             );
 
             if (result != null && result.first() != null) spawned++;

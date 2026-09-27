@@ -60,9 +60,7 @@ public class XPGainSystem extends DeathSystems.OnDeathSystem {
         var mastery = store.getComponent(killerRef, WeaponMasteryComponent.getComponentType());
         if (mastery == null) return;
 
-        // Usa o nome da classe como identificador do tipo de arma.
-        // Substituir por itemInHand.getItemType().getId() se a API Hytale expor isso.
-        var weaponId = itemInHand.getClass().getName();
+        var weaponId = itemInHand.getItemId();
         boolean leveledUp = mastery.addMasteryXP(weaponId, WeaponMasteryTable.XP_PER_KILL);
         int newLevel = mastery.getMasteryLevel(weaponId);
 

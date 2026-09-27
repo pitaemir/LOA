@@ -40,7 +40,7 @@ public class LOAResetLevel extends AbstractPlayerCommand {
 
         var player = store.getComponent(ref, Player.getComponentType());
         if (player != null) {
-            var rawHud = player.getHudManager().getCustomHud();
+            var rawHud = player.getHudManager().getCustomHud(LOAXPHud.KEY);
             if (rawHud instanceof LOAXPHud hud) {
                 hud.refresh(loa);
             }

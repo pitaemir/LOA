@@ -7,14 +7,20 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.troubledev.components.PlayerLOAComponent;
 import com.hypixel.hytale.server.core.ui.Anchor;
 import com.hypixel.hytale.server.core.ui.Value;
+import com.hypixel.hytale.server.core.HytaleServer;
+
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class LOAXPHud extends CustomUIHud {
 
+    public static final String KEY = "loa_xp_hud";
     private static final int BAR_MAX_WIDTH = 290;
     private PlayerLOAComponent loa;
+    private ScheduledFuture<?> hideBannerTask;
 
     public LOAXPHud(PlayerRef playerRef, PlayerLOAComponent loa) {
-        super(playerRef);
+        super(playerRef, KEY);
         this.loa = loa;
     }
 
@@ -82,12 +88,12 @@ public class LOAXPHud extends CustomUIHud {
         ui.set("#LevelUpText.TextSpans", Message.raw("LEVEL UP! Now Level " + newLevel + "!"));
         update(false, ui);
 
-        // esconde depois de 3 segundos
-        var playerRef = getPlayerRef();
-        java.util.concurrent.Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+        // esconde depois de 3 segundos (cancela o timer anterior se subir de nível de novo)
+        if (hideBannerTask != null) hideBannerTask.cancel(false);
+        hideBannerTask = HytaleServer.SCHEDULED_EXECUTOR.schedule(() -> {
             UICommandBuilder hideUi = new UICommandBuilder();
             hideUi.set("#LevelUpBanner.Visible", false);
             update(false, hideUi);
-        }, 3, java.util.concurrent.TimeUnit.SECONDS);
+        }, 3, TimeUnit.SECONDS);
     }
 }

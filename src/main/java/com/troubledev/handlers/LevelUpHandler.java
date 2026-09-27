@@ -27,7 +27,7 @@ public class LevelUpHandler implements Consumer<LevelUpEvent> {
         // mostra o banner na HUD
         var player = store.getComponent(event.playerRef(), Player.getComponentType());
         if (player != null) {
-            var rawHud = player.getHudManager().getCustomHud();
+            var rawHud = player.getHudManager().getCustomHud(LOAXPHud.KEY);
             if (rawHud instanceof LOAXPHud hud) {
                 hud.showLevelUp(event.newLevel());
             }

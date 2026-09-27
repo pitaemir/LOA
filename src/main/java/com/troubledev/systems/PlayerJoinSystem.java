@@ -36,7 +36,8 @@ public class PlayerJoinSystem extends RefSystem<EntityStore> {
                     "Welcome back! Level %d (%d XP)".formatted(loa.getLevel(), loa.getTotalExperience())
             ));
         } else {
-            commandBuffer.addComponent(ref, loaType, new PlayerLOAComponent());
+            loa = new PlayerLOAComponent();
+            commandBuffer.addComponent(ref, loaType, loa);
             playerRef.sendMessage(Message.raw("Welcome! Your adventure begins at Level 1."));
         }
 
@@ -47,8 +48,7 @@ public class PlayerJoinSystem extends RefSystem<EntityStore> {
 
         if (player != null) {
             var hud = new LOAXPHud(playerRef, loa);  // ← um único HUD, passando loa
-            player.getHudManager().setCustomHud(playerRef, hud);
-            hud.show();
+            player.getHudManager().addCustomHud(playerRef, hud);
         }
     }
 

@@ -24,7 +24,7 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
 
         //Atualiza a HUD depois de ganhar XP
         if (player != null) {
-            var rawHud = player.getHudManager().getCustomHud();
+            var rawHud = player.getHudManager().getCustomHud(LOAXPHud.KEY);
             if (rawHud instanceof LOAXPHud hud) {
                 hud.refresh(loa);
             }
