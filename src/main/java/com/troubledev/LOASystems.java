@@ -11,6 +11,7 @@ import com.troubledev.handlers.GiveXPHandler;
 import com.troubledev.handlers.LevelUpHandler;
 import com.troubledev.systems.PlayerJoinSystem;
 import com.troubledev.systems.XPGainSystem;
+import com.troubledev.waves.WaveManager;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
 public class LOASystems extends JavaPlugin {
@@ -44,5 +45,10 @@ public class LOASystems extends JavaPlugin {
         getEventRegistry().register(LevelUpEvent.class, new LevelUpHandler());
 
         getCommandRegistry().registerCommand(new LOACommand());
+    }
+
+    @Override
+    protected void shutdown() {
+        WaveManager.stop();
     }
 }
