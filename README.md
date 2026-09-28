@@ -1,204 +1,172 @@
 # Legends of the Ascended (LOA)
 
 ![Hytale](https://img.shields.io/badge/Game-Hytale-purple)
-![Framework](https://img.shields.io/badge/Framework-ECS-blue)
+![Server](https://img.shields.io/badge/Server-0.6.8-lightgrey)
 ![Language](https://img.shields.io/badge/Language-Java_25-orange)
 ![Status](https://img.shields.io/badge/Status-Prototype-yellow)
 
-A **PvP MOBA mod for *Hytale***, inspired by *Deadlock* and *Dota 2*. Two teams, lanes, creep waves marching toward the enemy base — built in small, playable steps on top of Hytale's **Entity Component System (ECS)**.
+**A MOBA game mode for Hytale** — two teams, lanes, creep waves pushing toward the enemy base — inspired by *Deadlock* and *Dota 2*.
 
-> **Current stage:** creep-wave prototype. Allied and enemy waves spawn on a timer, walk down a lane, fight each other and push to the other side. Structures (towers, base) and heroes come next.
+LOA is a solo project and a learning journey: I'm building a full game mode on top of Hytale's server API, one small playable slice at a time, and documenting what I learn about the engine along the way.
 
----
-
-## What works today
-
-### Teams
-- Every player and creep belongs to a team (`TeamComponent`). Players join the **blue** team automatically.
-- **Same team = allies, different team = enemies.** A custom attitude rule tells NPC AI who to attack, overriding the game's default relations.
-- **No friendly fire:** damage between teammates is cancelled (melee and projectiles), and a creep can never keep a teammate as its target.
-
-### Creep waves
-- Every *N* seconds each side spawns a wave: **3 melee + 2 ranged creeps** by default.
-- Enemy creeps (red) walk from the enemy spawn to your base; allied creeps (green) walk the opposite way. They meet in the middle and fight.
-- After a fight, creeps **resume the lane forward** from the nearest point — no wandering around.
-- On reaching the end of the lane they **patrol side to side** there, attacking anything that shows up.
-- All creeps share the same stats (100 HP, 10 damage per hit), regardless of NPC type.
-
-### Custom creeps
-- `Creep_Melee_Red` / `Creep_Melee_Green` — spear fighters.
-- `Creep_Ranged_Red` / `Creep_Ranged_Green` — archers: stop at ~11 blocks and shoot, **never back away**, keep a small gap between each other.
-- Based on the Kweebec warrior model, recolored per team (red autumn leaves / green leaves).
-- Behavior comes from the mod's own NPC template (`Template_LOA_Creep`).
-
-### Progression (from the original RPG prototype)
-- Player leveling (1–30) with an XP HUD and *LEVEL UP!* banner.
-- Weapon mastery per weapon type.
-- These will be reworked into **per-match** progression (everyone starts at level 1 each match).
+<!-- TODO: add a GIF of two creep waves clashing in the lane -->
 
 ---
 
-## Commands
+## Where it is now
 
-All commands are under `/loa` and require operator permission (`op add <name>` in the server console).
+The **creep wave** slice is playable:
 
-### Waves
+- Two teams. Players join the blue team; creeps are **green** (allies) and **red** (enemies).
+- Every wave spawns **3 melee + 2 ranged creeps per side**. They walk the lane toward each other, fight in the middle and keep pushing.
+- After a fight, creeps **resume the lane forward** instead of wandering off.
+- At the end of the lane they **hold position**, patrolling side to side and attacking whatever arrives.
+- **No friendly fire** — neither damage nor aggro between teammates.
+- Custom creeps: the Kweebec warrior, recolored per team, with its own AI template.
 
-| Command | Description |
+**Next:** base with health (first win/lose condition) → towers → gold & last hits → match flow → heroes.
+
+---
+
+## How it's built
+
+LOA uses Hytale's systems the way the game itself does, instead of working around them. Each feature below maps to an engine mechanism:
+
+| Feature | Hytale mechanism used |
 |---|---|
-| `/loa wave setspawn` | Set the **enemy spawn** to your position |
-| `/loa wave setbase` | Set **your base** (allied spawn) to your position |
-| `/loa wave now` | Spawn one wave right away |
-| `/loa wave start` | Spawn a wave every 60 s |
-| `/loa wave stop` | Stop the timer |
-| `/loa wave clear` | Remove all wave creeps |
+| Teams decide who NPCs attack | A custom `IAttitudeProvider` registered on the NPC `Blackboard`'s `AttitudeView` (priority 10, ahead of reputation at 100) |
+| No friendly fire | `DamageEventSystem` in the **filter damage group** that cancels same-team `Damage` (covers `ProjectileSource`) |
+| No aggro between teammates | `EntityTickingSystem` that clears teammate refs from `MarkedEntitySupport` |
+| Creeps walk the lane | `TransientPath` assigned through `NPCEntity.getPathManager()`, followed by the role's `Path` body motion |
+| Creeps hold the end of the lane | `EntityTickingSystem` that swaps the lane path for a short perpendicular patrol path on arrival |
+| Equal creep stats | Overriding the role's `NPC_Max` health modifier; fixing hit damage in the filter damage group |
+| Creep AI | Own **role template** (`Template_LOA_Creep`) — `Search` state removed, lost target → back to the lane |
+| Archers that never retreat | `Component_Instruction_Target_Adjusted_Attack_Melee` with `MaintainDistance: false`, chase `StopDistance` at attack range |
+| Team colors | Model `Parent` inheritance: the Kweebec warrior with three textures swapped, shipped in the mod's asset pack |
+| The map | An **instance template** (flat world gen) edited with `/instances edit`, one disposable copy per match later |
 
-Options for `now` / `start`:
-
-| Option | Default | Description |
-|---|---|---|
-| `--count N` | 3 | Melee creeps per side (0–20) |
-| `--ranged N` | 2 | Archers per side (0–10) |
-| `--sides both\|enemies\|allies` | both | Which side(s) spawn |
-| `--type ROLE` | `Creep_Melee_Red` | Enemy melee NPC role |
-| `--allytype ROLE` | `Creep_Melee_Green` | Allied melee NPC role |
-| `--interval S` | 60 | Seconds between waves (`start` only, ≥ 5) |
-
-`/loa wave clear` also accepts `--sides`.
-
-Examples:
-```
-/loa wave now --count 0 --ranged 4 --sides enemies   # only enemy archers
-/loa wave start --interval 30                         # faster waves
-```
-
-### Debug
-
-| Command | Description |
-|---|---|
-| `/loa spawn [--type NPC] [--count N]` | Spawn any NPC around you |
-| `/loa xp [--amount N]` | Give yourself XP |
-| `/loa stats` | Show level and XP |
-| `/loa resetlevel` | Reset your level to 1 |
-
-> Spawn and base points are kept in memory only — set them again after a server restart.
+Everything gameplay-tunable (health, speed, ranges, spacing) lives in JSON assets, so balancing doesn't need recompiling.
 
 ---
 
-## Project structure
+## What I learned about the engine
 
-### Code — `src/main/java/com/troubledev/`
+Notes from reading the server jar and the game's assets while building this. Shared in case they're useful to other modders — or to the Hytale team.
 
-```
-LOASystems.java              Plugin entry point: registers components, systems, events, commands
-team/
-├── Team                     BLUE / RED
-├── TeamComponent            Which team an entity belongs to (saved)
-├── TeamAttitudeSystem       NPC AI: same team -> friendly, other team -> hostile
-├── TeamDamageSystem         Cancels damage between teammates
-└── TeamTargetSystem         Drops a creep's target if it is a teammate
-waves/
-├── WaveManager              Wave timer, spawning, lane paths, /loa wave clear
-├── CreepLaneComponent       Where a creep came from and where it is going
-├── CreepLaneSystem          Switches creeps to side-to-side patrol at the end of the lane
-├── CreepStats               Shared creep health and damage values
-└── CreepDamageSystem        Every creep hit deals CreepStats.DAMAGE
-commands/                    /loa and its subcommands (LOAWaveCommand, ...)
-components/, level/,         Player level and weapon mastery (RPG prototype)
-systems/, events/, handlers/
-ui/LOAXPHud                  XP bar HUD
-```
+**Things that worked really well**
+- **Role `Variant` + `Reference` inheritance** made custom creeps almost free: one template, then per-team roles that only change `Appearance`.
+- **The attitude provider chain** is a clean extension point — one lambda turned the whole NPC AI team-aware.
+- **Damage system groups** (gather → filter → inspect) make it obvious where to hook, and later systems already skip cancelled events.
+- **Instances + `/instances edit`** are a great fit for match-based modes: build the map once, spawn a fresh copy per match.
 
-### Assets — `src/main/resources/` (the mod's asset pack)
+**Possible issues found in vanilla assets**
+- `Template_Kweebec_Razorleaf` doesn't define the `Melee_Damage` interaction var (`Template_Intelligent` and `Trork_*` roles do). Its spear hits log `Missing replacement interactions for interaction ... for var Melee_Damage` and seem to deal no damage. LOA's template adds the var.
 
-```
-Server/NPC/Roles/LOA/
-├── Templates/Template_LOA_Creep.json            Creep AI (state machine) — based on the Kweebec warrior
-├── Components/Component_LOA_Creep_Follow_Lane    Walk the lane forward, resume from nearest node
-├── Components/Component_LOA_Attack_Sequence_Bow  Archer shot
-├── Creep_Melee_{Red,Green}.json                  Melee creep roles
-└── Creep_Ranged_{Red,Green}.json                 Archer roles
-Server/Models/LOA/Creep_{Red,Green}.json          Appearance (Kweebec warrior + team textures)
-Common/NPC/LOA/Creep/*.png                         Team-colored textures
-Common/UI/Custom/LOAXPHud.ui                       HUD layout
-```
-
-### Where to tweak creeps
-
-| To change | Edit |
-|---|---|
-| Health / damage of all creeps | `CreepStats.java` |
-| View range, speed, weapon, attack range | `Parameters` in `Template_LOA_Creep.json` or a creep role |
-| Archer stop distance / spacing | `ChaseStopDistance`, `SeparationDistance` in the ranged roles / template |
-| "Arrived" distance and patrol width | `ARRIVE_DISTANCE`, `PATROL_HALF_WIDTH` in `CreepLaneSystem.java` |
-| Wave size and interval | Constants at the top of `WaveManager.java` |
+**Would love to have in the API**
+- **Projectile collision filtering** — projectiles only ignore their creator; a hook to let arrows pass through teammates would make ranged units in team modes much cleaner.
+- **A path shape that stops at the last node** — `LINE` ping-pongs and `LOOP` restarts; lane-walking units need "go to the end and stay".
+- **Team-aware separation** — `ApplySeparation` pushes away from any nearby entity, including enemies in melee range.
 
 ---
 
-## Development
+## Try it
 
-### Requirements
-
-- Java 25
-- Hytale installed via the official launcher (server jar and assets are taken from the install)
-
-### Folder layout
-
-```
-HytaleModding/
-├── first_try/            ← this repository (the mod)
-├── server/               ← local test server (world, config, mods/)
-│   └── mods/LOA_Maps/    ← editable asset pack with the map template (MobaMap)
-└── art/                  ← reference models and texture work (not shipped)
-```
-
-### Run a local test server
+**Requirements:** Java 25, Hytale installed via the official launcher.
 
 ```bash
 ./run-server.sh
 ```
 
-The script updates `libs/HytaleServer.jar` if Hytale was updated, builds the mod, copies it to `../server/mods/` and starts the server. Connect to `localhost` from Hytale. After changing code: **Ctrl+C** and run the script again.
+The script syncs `libs/HytaleServer.jar` with your Hytale install, builds the mod, copies it to `../server/mods/` and starts a local server. Connect to `localhost`.
 
-First run only, in the server console:
+First run, in the server console:
 ```
-/auth login device            # authorize the server with your Hytale account
-/auth persistence Encrypted   # keep the login across restarts
-op add <your-username>        # allow /loa commands
-```
-
-### Build only
-
-```bash
-./gradlew build
+/auth login device
+/auth persistence Encrypted
+op add <your-username>
 ```
 
-The jar is written to `build/libs/`.
+In game:
+```
+/loa wave setspawn     # stand where the enemy creeps should come from
+/loa wave setbase      # stand at your base
+/loa wave now          # spawn a wave on both sides
+/loa wave start        # ... or every 60 seconds
+```
 
-### Editing the map
+<details>
+<summary><b>All wave commands and options</b></summary>
 
-The map is a Hytale **instance template** stored in `server/mods/LOA_Maps/Server/Instances/MobaMap/` (flat terrain, no natural mob spawns, time frozen at day, creative mode).
-
-| Action | Command |
+| Command | Description |
 |---|---|
-| Edit the map | `/instances edit load MobaMap` |
+| `/loa wave setspawn` / `setbase` | Set the enemy spawn / your base to your position |
+| `/loa wave now` | Spawn one wave |
+| `/loa wave start` / `stop` | Start / stop the wave timer |
+| `/loa wave clear` | Remove all wave creeps |
+
+| Option (`now` / `start`) | Default | |
+|---|---|---|
+| `--count N` | 3 | Melee creeps per side |
+| `--ranged N` | 2 | Archers per side |
+| `--sides both\|enemies\|allies` | both | Which sides spawn (`clear` accepts it too) |
+| `--type` / `--allytype ROLE` | `Creep_Melee_Red` / `_Green` | Melee NPC role per side |
+| `--interval S` | 60 | Seconds between waves (`start`) |
+
+Debug: `/loa spawn`, `/loa xp`, `/loa stats`, `/loa resetlevel`.
+</details>
+
+<details>
+<summary><b>Editing the map</b></summary>
+
+The map template lives in `server/mods/LOA_Maps/Server/Instances/MobaMap/` — an editable folder asset pack (packs inside `.jar`/`.zip` are read-only). Flat terrain, no natural spawns, frozen daytime, creative mode.
+
+| | |
+|---|---|
+| Edit | `/instances edit load MobaMap` |
 | Save | `/world save` |
-| Back to the main world | `/tp world default` |
-| Play a disposable copy | `/instances spawn MobaMap` (leave with `/instances exit`) |
+| Leave | `/tp world default` |
+| Play a copy | `/instances spawn MobaMap` → `/instances exit` |
+</details>
 
-The `server/` folder is not part of this repository — back up `LOA_Maps` regularly.
+---
+
+## Code map
+
+```
+src/main/java/com/troubledev/
+├── LOASystems.java            Plugin entry: registers everything
+├── team/                      Teams: attitude provider, friendly-fire filter, teammate-target cleanup
+├── waves/                     Wave spawning, lane paths, end-of-lane patrol, shared creep stats
+├── commands/                  /loa and subcommands
+├── ui/                        XP HUD
+└── components/ level/ systems/ events/ handlers/
+                               Player level & weapon mastery — from the RPG prototype this
+                               project started as; will become per-match progression
+
+src/main/resources/            The mod's asset pack
+├── Server/NPC/Roles/LOA/      Creep template, lane-follow and bow components, creep roles
+├── Server/Models/LOA/         Team-colored creep appearances
+└── Common/NPC/LOA/Creep/      Team textures
+```
+
+| To tweak | Edit |
+|---|---|
+| Creep health / damage | `waves/CreepStats.java` |
+| View range, speed, weapon, attack range | `Template_LOA_Creep.json` parameters or a creep role |
+| Archer stop distance / spacing | `ChaseStopDistance`, `SeparationDistance` |
+| End-of-lane arrival and patrol width | `waves/CreepLaneSystem.java` |
+| Wave size and timing | `waves/WaveManager.java` |
 
 ---
 
-## Roadmap
+## Project history
 
-1. **Map points** — save spawn/base per map so waves work right after loading it
-2. **Base with health** — enemy creeps reaching the end damage the base; first win/lose condition
-3. **Towers** — static defenders on each side of the lane
-4. **Economy** — gold for last hits, simple item shop
-5. **Match manager** — lobby → match → end, teams, respawn timers, per-match progression, one instance per match
-6. **Heroes** — abilities with cooldowns
+LOA started as an **RPG progression tutorial** (XP, levels 1–30, weapon mastery, XP HUD). Once the ECS basics clicked, the goal grew into a full MOBA mode. The progression systems are still in the codebase and will be reworked so that everyone starts each match at level 1.
 
 ---
+
+## Contact
+
+Built by **pitaemir** — feedback, ideas and bug reports are very welcome through GitHub issues.
 
 > *Forge your legend.*
