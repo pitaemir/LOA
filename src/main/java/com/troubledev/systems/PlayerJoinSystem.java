@@ -8,6 +8,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.troubledev.components.PlayerLOAComponent;
 import com.troubledev.components.WeaponMasteryComponent;
+import com.troubledev.team.Team;
+import com.troubledev.team.TeamComponent;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -44,6 +46,12 @@ public class PlayerJoinSystem extends RefSystem<EntityStore> {
         var masteryType = WeaponMasteryComponent.getComponentType();
         if (store.getComponent(ref, masteryType) == null) {
             commandBuffer.addComponent(ref, masteryType, new WeaponMasteryComponent());
+        }
+
+        // Por enquanto todo jogador é do time azul (aliado das tropas azuis)
+        var teamType = TeamComponent.getComponentType();
+        if (store.getComponent(ref, teamType) == null) {
+            commandBuffer.addComponent(ref, teamType, new TeamComponent(Team.BLUE));
         }
 
         if (player != null) {

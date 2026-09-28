@@ -1,0 +1,27 @@
+{
+  "Type": "Variant",
+  "Reference": "Template_LOA_Creep",
+  "Modify": {
+    "Appearance": "Creep_Red",
+    "DropList": "Empty",
+    "MaxHealth": 100,
+    "IsMemory": false,
+    "NameTranslationKey": {
+      "Compute": "NameTranslationKey"
+    },
+    "Weapons": [
+      "Weapon_Shortbow_Crude"
+    ],
+    "AttackSequence": "Component_LOA_Attack_Sequence_Bow",
+    "AttackDistance": 12,
+    "ChaseStopDistance": 11,
+    "MaintainDistance": false,
+    "ApplySeparation": true
+  },
+  "Parameters": {
+    "NameTranslationKey": {
+      "Value": "server.npcRoles.Kweebec_Razorleaf.name",
+      "Description": "Translation key for NPC name display"
+    }
+  }
+}

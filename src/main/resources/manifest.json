@@ -3,5 +3,10 @@
   "Name": "MiniloaPlugin",
   "Version": "1.0.0",
   "Main": "com.troubledev.LOASystems",
-  "IncludesAssetPack": true
+  "ServerVersion": "*",
+  "IncludesAssetPack": true,
+  "Dependencies": {
+    "Hytale:NPC": "*",
+    "Hytale:Path": "*"
+  }
 }

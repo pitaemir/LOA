@@ -11,6 +11,13 @@ import com.troubledev.handlers.GiveXPHandler;
 import com.troubledev.handlers.LevelUpHandler;
 import com.troubledev.systems.PlayerJoinSystem;
 import com.troubledev.systems.XPGainSystem;
+import com.troubledev.team.TeamAttitudeSystem;
+import com.troubledev.team.TeamComponent;
+import com.troubledev.team.TeamDamageSystem;
+import com.troubledev.team.TeamTargetSystem;
+import com.troubledev.waves.CreepDamageSystem;
+import com.troubledev.waves.CreepLaneComponent;
+import com.troubledev.waves.CreepLaneSystem;
 import com.troubledev.waves.WaveManager;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 
@@ -38,8 +45,24 @@ public class LOASystems extends JavaPlugin {
         );
         WeaponMasteryComponent.setComponentType(masteryType);
 
+        var teamType = registry.registerComponent(
+                TeamComponent.class,
+                "LOA_Team",
+                TeamComponent.CODEC
+        );
+        TeamComponent.setComponentType(teamType);
+
+        // Sem codec: não é salvo em disco (só vale enquanto a tropa está viva nesta sessão)
+        var laneType = registry.registerComponent(CreepLaneComponent.class, CreepLaneComponent::new);
+        CreepLaneComponent.setComponentType(laneType);
+
         registry.registerSystem(new XPGainSystem());
         registry.registerSystem(new PlayerJoinSystem());
+        registry.registerSystem(new TeamAttitudeSystem());
+        registry.registerSystem(new CreepDamageSystem());
+        registry.registerSystem(new TeamDamageSystem());
+        registry.registerSystem(new TeamTargetSystem());
+        registry.registerSystem(new CreepLaneSystem());
 
         getEventRegistry().register(GiveXPEvent.class, new GiveXPHandler());
         getEventRegistry().register(LevelUpEvent.class, new LevelUpHandler());
