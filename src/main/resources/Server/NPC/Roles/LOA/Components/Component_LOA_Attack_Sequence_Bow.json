@@ -10,6 +10,14 @@
     "CombatRelativeTurnSpeed": {
       "Value": 1.5,
       "Description": "Modifier that decides turn speed difference in combat"
+    },
+    "AimHitProbability": {
+      "Value": 0.95,
+      "Description": "LOA: chance of a shot going straight at the target (engine default 0.33)"
+    },
+    "AimSpread": {
+      "Value": 0.2,
+      "Description": "LOA: random aim error when a shot is not straight, 0-5 (engine default 1)"
     }
   },
   "Content": {
@@ -39,7 +47,14 @@
       "Type": "Aim",
       "RelativeTurnSpeed": {
         "Compute": "CombatRelativeTurnSpeed"
-      }
+      },
+      "HitProbability": {
+        "Compute": "AimHitProbability"
+      },
+      "Spread": {
+        "Compute": "AimSpread"
+      },
+      "Deflection": true
     }
   },
   "Type": "Component"
