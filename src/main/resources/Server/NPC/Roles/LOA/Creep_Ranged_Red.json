@@ -15,8 +15,7 @@
     "AttackSequence": "Component_LOA_Attack_Sequence_Bow",
     "AttackDistance": 12,
     "ChaseStopDistance": 11,
-    "MaintainDistance": false,
-    "ApplySeparation": true
+    "MaintainDistance": false
   },
   "Parameters": {
     "NameTranslationKey": {

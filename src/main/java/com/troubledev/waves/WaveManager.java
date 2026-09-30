@@ -7,6 +7,7 @@ import com.hypixel.hytale.component.RemoveReason;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.math.vector.Rotation3f;
 import com.hypixel.hytale.server.core.HytaleServer;
+import com.hypixel.hytale.server.core.modules.physics.util.PhysicsMath;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.NPCPlugin;
@@ -16,8 +17,9 @@ import com.troubledev.team.TeamComponent;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,14 +42,20 @@ public final class WaveManager {
     public static final int DEFAULT_RANGED_COUNT = 2;
     // Os arqueiros nascem esse tanto atrás dos corpo a corpo
     private static final double RANGED_SPAWN_BEHIND = 3.0;
+    // Distância lateral entre tropas da mesma fileira ao nascer
+    private static final double SPAWN_SPACING = 1.5;
     public static final int DEFAULT_INTERVAL_SECONDS = 60;
 
-    // Distância entre waypoints intermediários (o sensor de caminho procura num raio de 30 blocos)
-    private static final double WAYPOINT_SPACING = 8.0;
+    // Distância entre waypoints. Pequena de propósito: depois de uma luta a tropa retoma do nó
+    // mais próximo, e com nós espaçados esse nó podia ficar vários blocos para trás.
+    private static final double WAYPOINT_SPACING = 2.0;
 
     // Pontos da lane de teste do MobaMap. /loa wave setspawn e setbase substituem até o próximo reinício.
     public static final Vector3d DEFAULT_SPAWN_POINT = new Vector3d(2, 80, -153);
     public static final Vector3d DEFAULT_BASE_POINT = new Vector3d(1, 80, 23);
+
+    // Tropas das ondas (para a busca de alvo do CreepLaneSystem). Refs inválidas são limpas na hora de usar.
+    private static final Set<Ref<EntityStore>> troops = ConcurrentHashMap.newKeySet();
 
     private static Vector3d spawnPoint = new Vector3d(DEFAULT_SPAWN_POINT);
     private static Vector3d basePoint = new Vector3d(DEFAULT_BASE_POINT);
@@ -122,39 +130,58 @@ public final class WaveManager {
         return spawned;
     }
 
-    /** behind = quantos blocos atrás do ponto de saída (no sentido contrário da lane) nascer. */
+    /**
+     * Spawna uma fileira de tropas em formação: lado a lado (perpendicular à lane),
+     * SPAWN_SPACING blocos entre cada uma, "behind" blocos atrás do ponto de saída.
+     * Cada tropa anda numa linha paralela às outras até o fim da lane.
+     * Formação fixa em vez de posição aleatória: evita tropas nascendo uma dentro da outra.
+     */
     private static int spawnGroup(String npcType, int count, Team team, Vector3d from, Vector3d to, double behind) {
         var store = world.getEntityStore().getStore();
-        var random = ThreadLocalRandom.current();
         var spawned = 0;
 
-        var back = new Vector3d(from).sub(to);
-        back.y = 0;
-        if (back.lengthSquared() > 0.001) back.normalize(behind);
-        else back.zero();
+        // Direção da lane (horizontal) e a perpendicular a ela
+        var forward = new Vector3d(to).sub(from);
+        forward.y = 0;
+        if (forward.lengthSquared() < 0.001) forward.set(0, 0, 1);
+        forward.normalize();
+        var side = new Vector3d(-forward.z, 0, forward.x);
 
         for (int i = 0; i < count; i++) {
-            // Espalha um pouco pra não nascerem todos no mesmo bloco
-            var pos = new Vector3d(
-                    from.x() + back.x() + random.nextDouble() * 2 - 1,
-                    from.y(),
-                    from.z() + back.z() + random.nextDouble() * 2 - 1
-            );
+            var lateral = (i - (count - 1) / 2.0) * SPAWN_SPACING;
+            var pos = new Vector3d(from)
+                    .fma(-behind, forward)
+                    .fma(lateral, side);
 
-            var result = NPCPlugin.get().spawnNPC(store, npcType, null, pos, new Rotation3f());
+            // Cada tropa tem a sua própria linha na lane: o destino dela tem o mesmo deslocamento
+            // lateral de onde nasceu. A formação se mantém até o fim sem precisar da separação
+            // (que empurra as tropas e fazia elas travarem).
+            var laneFrom = new Vector3d(from).fma(lateral, side);
+            var laneTo = new Vector3d(to).fma(lateral, side);
+
+            var result = NPCPlugin.get().spawnNPC(store, npcType, null, pos, spawnRotation(from, to));
             if (result == null || result.first() == null) continue;
 
             var ref = result.first();
             store.addComponent(ref, TeamComponent.getComponentType(), new TeamComponent(team));
             CreepStats.applyHealth(store, ref);
-            store.addComponent(ref, CreepLaneComponent.getComponentType(), new CreepLaneComponent(from, to));
+            CreepStats.disableRegen(store, ref);
+            CreepStats.disableBodyBlock(store, ref);
+            store.addComponent(ref, CreepLaneComponent.getComponentType(), new CreepLaneComponent(laneFrom, laneTo));
+            troops.add(ref);
 
             var npc = store.getComponent(ref, NPCEntity.getComponentType());
-            if (npc != null) npc.getPathManager().setTransientPath(buildPath(pos, to));
+            if (npc != null) npc.getPathManager().setTransientPath(buildPath(pos, laneTo));
             spawned++;
         }
 
         return spawned;
+    }
+
+    /** Tropas vivas das ondas (remove as que já morreram ou sumiram). */
+    public static Iterable<Ref<EntityStore>> liveTroops() {
+        troops.removeIf(ref -> !ref.isValid());
+        return troops;
     }
 
     /**
@@ -183,16 +210,69 @@ public final class WaveManager {
     }
 
     /** Caminho em linha reta de from até to, com waypoints a cada WAYPOINT_SPACING blocos. */
-    private static TransientPath buildPath(Vector3d from, Vector3d to) {
+    /** Teste de depuração: para onde as tropas olham ao nascer (/loa wave facing). */
+    public enum SpawnFacing { FORWARD, BACKWARD, ZERO }
+
+    private static SpawnFacing spawnFacing = SpawnFacing.BACKWARD; // testado: nascer de costas evita tropas presas no spawn
+
+    public static void setSpawnFacing(SpawnFacing facing) { spawnFacing = facing; }
+    public static SpawnFacing getSpawnFacing() { return spawnFacing; }
+
+    private static Rotation3f spawnRotation(Vector3d from, Vector3d to) {
+        return switch (spawnFacing) {
+            case FORWARD -> facing(from, to);
+            case BACKWARD -> facing(to, from);
+            case ZERO -> new Rotation3f(); // o que era antes: yaw 0 (-Z) para os dois times
+        };
+    }
+
+    /**
+     * Rotação olhando de "from" para "to" (no plano horizontal).
+     * No Hytale o ângulo (yaw) 0 aponta para -Z; PhysicsMath faz a conversão direção <-> ângulo.
+     */
+    static Rotation3f facing(Vector3d from, Vector3d to) {
+        var rotation = new Rotation3f();
+        var dx = to.x() - from.x();
+        var dz = to.z() - from.z();
+        if (dx * dx + dz * dz > 0.0001) rotation.addYaw(PhysicsMath.headingFromDirection(dx, dz));
+        return rotation;
+    }
+
+    /**
+     * Caminho que primeiro passa por um ponto de desvio (ao lado e um pouco à frente)
+     * e depois segue até o destino. Usado para contornar uma tropa que está bloqueando.
+     */
+    static TransientPath buildDetourPath(Vector3d from, Vector3d to, double sideOffset) {
+        var forward = new Vector3d(to).sub(from);
+        forward.y = 0;
+        if (forward.lengthSquared() < 0.001) return buildPath(from, to);
+        forward.normalize();
+        var side = new Vector3d(-forward.z, 0, forward.x);
+
+        var detour = new Vector3d(from).fma(sideOffset, side).fma(1.5, forward);
         var path = new TransientPath();
+        path.addWaypoint(new Vector3d(from), facing(from, detour));
+        addLine(path, detour, to);
+        return path;
+    }
+
+    static TransientPath buildPath(Vector3d from, Vector3d to) {
+        var path = new TransientPath();
+        addLine(path, from, to);
+        return path;
+    }
+
+    /** Pontos em linha reta de from até to, a cada WAYPOINT_SPACING blocos, todos olhando no sentido da linha. */
+    private static void addLine(TransientPath path, Vector3d from, Vector3d to) {
+        var forward = facing(from, to);
         var distance = from.distance(to);
         var steps = Math.max(1, (int) Math.ceil(distance / WAYPOINT_SPACING));
 
         for (int i = 0; i <= steps; i++) {
             var t = (double) i / steps;
             var point = new Vector3d(from).lerp(to, t);
-            path.addWaypoint(point, new Rotation3f());
+            path.addWaypoint(point, new Rotation3f(forward));
         }
-        return path;
     }
+
 }

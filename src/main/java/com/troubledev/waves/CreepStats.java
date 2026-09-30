@@ -2,6 +2,9 @@ package com.troubledev.waves;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.modules.entity.component.HealthRegenState;
+import com.hypixel.hytale.server.core.modules.entity.hitboxcollision.HitboxCollision;
+import com.hypixel.hytale.server.core.modules.entity.repulsion.Repulsion;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
@@ -25,6 +28,31 @@ public final class CreepStats {
     private static final String MAX_HEALTH_MODIFIER = "NPC_Max";
 
     private CreepStats() {}
+
+    /**
+     * Tropas não regeneram vida fora de combate. A regra de regeneração dos NPCs
+     * (Server/Entity/Stats/Health.json, condição "RegenHealth") olha o HealthRegenState;
+     * sem esse componente, a regeneração fica ligada.
+     */
+    public static void disableRegen(Store<EntityStore> store, Ref<EntityStore> ref) {
+        var regen = store.getComponent(ref, HealthRegenState.getComponentType());
+        if (regen == null) {
+            regen = new HealthRegenState();
+            regen.setRegenEnabled(false);
+            store.addComponent(ref, HealthRegenState.getComponentType(), regen);
+        } else {
+            regen.setRegenEnabled(false);
+        }
+    }
+
+    /**
+     * Teste de "body block": tira a colisão sólida (HitboxCollision) e o empurrão entre
+     * entidades (Repulsion) da tropa, caso ela tenha esses componentes.
+     */
+    public static void disableBodyBlock(Store<EntityStore> store, Ref<EntityStore> ref) {
+        store.removeComponentIfExists(ref, HitboxCollision.getComponentType());
+        store.removeComponentIfExists(ref, Repulsion.getComponentType());
+    }
 
     /** Troca a vida máxima do NPC por HEALTH e enche a vida. */
     public static void applyHealth(Store<EntityStore> store, Ref<EntityStore> ref) {

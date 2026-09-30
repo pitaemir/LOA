@@ -35,6 +35,7 @@ import javax.annotation.Nonnull;
  *   /loa wave now --count 0 --ranged 3  -> só arqueiros
  *   /loa wave stop
  *   /loa wave clear [--sides allies]    -> remove as tropas (dos dois times por padrão)
+ *   /loa wave facing --mode backward    -> teste: direção das tropas ao nascer (forward | backward | zero)
  */
 public class LOAWaveCommand extends AbstractCommandCollection {
 
@@ -46,6 +47,7 @@ public class LOAWaveCommand extends AbstractCommandCollection {
         addSubCommand(new NowCommand());
         addSubCommand(new StopCommand());
         addSubCommand(new ClearCommand());
+        addSubCommand(new FacingCommand());
     }
 
     private static Vector3d positionOf(Store<EntityStore> store, Ref<EntityStore> ref) {
@@ -278,6 +280,38 @@ public class LOAWaveCommand extends AbstractCommandCollection {
             var removed = WaveManager.clearTroops(store, team);
             var hint = WaveManager.isRunning() ? " (waves are still running, use /loa wave stop)" : "";
             playerRef.sendMessage(Message.raw("Removed %d troops%s".formatted(removed, hint)));
+        }
+    }
+
+    private static class FacingCommand extends AbstractPlayerCommand {
+        private final OptionalArg<String> modeArg;
+
+        FacingCommand() {
+            super("facing", "Debug: where troops face when they spawn");
+            this.modeArg = withOptionalArg("mode", "forward | backward | zero", ArgTypes.STRING);
+        }
+
+        @Override
+        protected void execute(
+                @Nonnull CommandContext context,
+                @Nonnull Store<EntityStore> store,
+                @Nonnull Ref<EntityStore> ref,
+                @Nonnull PlayerRef playerRef,
+                @Nonnull World world
+        ) {
+            var mode = modeArg.get(context);
+            if (mode == null) {
+                playerRef.sendMessage(Message.raw("Spawn facing: %s (use --mode forward | backward | zero)"
+                        .formatted(WaveManager.getSpawnFacing().name().toLowerCase())));
+                return;
+            }
+            try {
+                WaveManager.setSpawnFacing(WaveManager.SpawnFacing.valueOf(mode.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                playerRef.sendMessage(Message.raw("--mode must be forward, backward or zero"));
+                return;
+            }
+            playerRef.sendMessage(Message.raw("Troops now spawn facing: %s".formatted(mode.toLowerCase())));
         }
     }
 }

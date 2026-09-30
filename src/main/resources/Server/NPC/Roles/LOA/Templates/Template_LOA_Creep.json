@@ -15,8 +15,8 @@
       "Description": "View range"
     },
     "ViewSector": {
-      "Value": 180,
-      "Description": "View sector"
+      "Value": 360,
+      "Description": "LOA: 360 - creeps notice fights beside and behind them (vanilla 180 made them ignore nearby combat)"
     },
     "HearingRange": {
       "Value": 10,
@@ -35,7 +35,7 @@
       "Description": "Drop Items"
     },
     "MaxSpeed": {
-      "Value": 5,
+      "Value": 10,
       "Description": "Maximum walking speed"
     },
     "AttitudeGroup": {
@@ -50,7 +50,7 @@
       "Description": "NPC Weapons"
     },
     "AttackSequence": {
-      "Value": "Component_Instruction_Attack_Sequence_Kweebec_Sapling_Razorleaf",
+      "Value": "Component_LOA_Attack_Sequence_Melee",
       "Description": "The attack sequence to use in combat"
     },
     "AttackDistance": {
@@ -94,12 +94,12 @@
       "Description": "LOA: whether the creep moves back and forth to stay exactly at attack distance (false = never backs away)"
     },
     "ApplySeparation": {
-      "Value": false,
-      "Description": "LOA: keep a distance from nearby NPCs instead of stacking on the same spot"
+      "Value": true,
+      "Description": "LOA: keep a small distance from nearby NPCs instead of stacking on the same spot"
     },
     "SeparationDistance": {
-      "Value": 0.85,
-      "Description": "LOA: desired distance between centers. Kweebec body is 0.6 wide, so 0.85 leaves a 1/4 block gap"
+      "Value": 0.7,
+      "Description": "LOA: desired distance between centers. Kweebec body is 0.6 wide, so 0.7 leaves a 0.1 block gap"
     }
   },
   "IsMemory": {
@@ -138,6 +138,8 @@
   "SeparationDistanceTarget": {
     "Compute": "SeparationDistance"
   },
+  "CollisionDistance": 0.01,
+  "CollisionViewAngle": 0,
   "MotionControllerList": [
     {
       "Type": "Walk",
@@ -286,40 +288,16 @@
                         "Hostile"
                       ]
                     }
-                  },
-                  {
-                    "Type": "Player",
-                    "Range": {
-                      "Compute": "ViewRange"
-                    },
-                    "LockOnTarget": true,
-                    "Filters": [
-                      {
-                        "Type": "LineOfSight"
-                      },
-                      {
-                        "Type": "ViewSector",
-                        "ViewSector": {
-                          "Compute": "ViewSector"
-                        }
-                      },
-                      {
-                        "Type": "ItemInHand",
-                        "Items": [
-                          "*_Axe*",
-                          "*_Hatchet*"
-                        ]
-                      }
-                    ]
                   }
                 ]
               },
               "Actions": [
                 {
                   "Type": "State",
-                  "State": "Alerted"
+                  "State": "Attack"
                 }
-              ]
+              ],
+              "$Comment": "LOA: enemy spotted -> attack immediately (vanilla went to Alerted: long animation + 1-2s wait)"
             },
             {
               "Continue": true,
@@ -374,18 +352,6 @@
                 {
                   "Weight": 50,
                   "Instructions": [
-                    {
-                      "Sensor": {
-                        "Type": "Leash",
-                        "Range": 20
-                      },
-                      "BodyMotion": {
-                        "Type": "Seek",
-                        "RelativeSpeed": 0.45,
-                        "StopDistance": 2,
-                        "SlowDownDistance": 3
-                      }
-                    },
                     {
                       "Continue": true,
                       "ActionsAtomic": true,
@@ -603,8 +569,11 @@
           },
           "Instructions": [
             {
-              "$Comment": "LOA: creeps never search around, go straight back to the lane",
+              "$Comment": "LOA: end of combat. ResetPath makes the path sensor pick the lane path up again from the nearest node (it caches the path and would resume the node it was heading to before the fight), then back to Idle, which walks the lane.",
               "Actions": [
+                {
+                  "Type": "ResetPath"
+                },
                 {
                   "Type": "State",
                   "State": "Idle"
@@ -645,20 +614,12 @@
               }
             },
             {
-              "Reference": "Component_Instruction_Simple_Soft_Leash",
-              "Modify": {
-                "_ExportStates": [
-                  "Idle"
-                ]
-              }
-            },
-            {
               "Reference": "Component_Instruction_Intelligent_Chase",
               "Modify": {
                 "_ExportStates": [
-                  "Idle",
-                  "Idle",
-                  "Idle"
+                  "Search",
+                  "Search",
+                  "Search"
                 ],
                 "ViewRange": {
                   "Compute": "AlertedRange"
@@ -683,5 +644,5 @@
   "NameTranslationKey": {
     "Compute": "NameTranslationKey"
   },
-  "$Comment": "LOA creep template (based on Template_Kweebec_Razorleaf): no Search state, no ally beacons, follows the lane"
+  "$Comment": "LOA creep template (based on Template_Kweebec_Razorleaf): no Search state, no ally beacons, follows the lane | Body block test: NPC collision avoidance disabled (CollisionDistance 0.01 - must be > 0 -, CollisionViewAngle 0)"
 }
