@@ -10,6 +10,7 @@ import com.troubledev.components.PlayerLOAComponent;
 import com.troubledev.components.WeaponMasteryComponent;
 import com.troubledev.team.Team;
 import com.troubledev.team.TeamComponent;
+import com.troubledev.testing.AutoTestMap;
 import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -53,6 +54,9 @@ public class PlayerJoinSystem extends RefSystem<EntityStore> {
         if (store.getComponent(ref, teamType) == null) {
             commandBuffer.addComponent(ref, teamType, new TeamComponent(Team.BLUE));
         }
+
+        // Leva direto para a cópia do mapa de teste (desliga com /loa testmap)
+        AutoTestMap.onPlayerJoined(store.getExternalData().getWorld(), ref, playerRef.getUuid());
 
         if (player != null) {
             var hud = new LOAXPHud(playerRef, loa);  // ← um único HUD, passando loa
