@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
  * /loa wave - Teste de ondas de tropas nos dois sentidos da lane.
  *
  * Usage:
+ *   Por padrão usa os pontos da lane de teste do MobaMap (WaveManager.DEFAULT_*_POINT).
  *   /loa wave setspawn                  -> ponto onde os inimigos nascem (sua posição)
  *   /loa wave setbase                   -> sua base: onde os aliados nascem (sua posição)
  *   /loa wave start                     -> a cada 60s, por lado: 3 corpo a corpo + 2 arqueiros
@@ -184,6 +185,7 @@ public class LOAWaveCommand extends AbstractCommandCollection {
                 @Nonnull PlayerRef playerRef,
                 @Nonnull World world
         ) {
+            WaveManager.useWorld(world);
             if (!checkConfigured(playerRef)) return;
 
             var settings = readSettings(context, playerRef);
@@ -210,6 +212,7 @@ public class LOAWaveCommand extends AbstractCommandCollection {
                 @Nonnull PlayerRef playerRef,
                 @Nonnull World world
         ) {
+            WaveManager.useWorld(world);
             if (!checkConfigured(playerRef)) return;
 
             var settings = readSettings(context, playerRef);

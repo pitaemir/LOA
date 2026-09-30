@@ -45,8 +45,12 @@ public final class WaveManager {
     // Distância entre waypoints intermediários (o sensor de caminho procura num raio de 30 blocos)
     private static final double WAYPOINT_SPACING = 8.0;
 
-    private static Vector3d spawnPoint;
-    private static Vector3d basePoint;
+    // Pontos da lane de teste do MobaMap. /loa wave setspawn e setbase substituem até o próximo reinício.
+    public static final Vector3d DEFAULT_SPAWN_POINT = new Vector3d(2, 80, -153);
+    public static final Vector3d DEFAULT_BASE_POINT = new Vector3d(1, 80, 23);
+
+    private static Vector3d spawnPoint = new Vector3d(DEFAULT_SPAWN_POINT);
+    private static Vector3d basePoint = new Vector3d(DEFAULT_BASE_POINT);
     private static World world;
     private static ScheduledFuture<?> task;
     private static WaveSettings settings = WaveSettings.defaults();
@@ -62,6 +66,11 @@ public final class WaveManager {
     }
 
     private WaveManager() {}
+
+    /** As ondas acontecem no mundo de quem deu o comando (ex.: a cópia do MobaMap em que você está). */
+    public static void useWorld(World w) {
+        world = w;
+    }
 
     public static void setSpawnPoint(World w, Vector3d pos) {
         world = w;
